@@ -4,7 +4,14 @@ import androidx.lifecycle.LiveData
 
 class ContactRepository(private val contactDao: ContactDao) {
 
-    val allContacts: LiveData<List<Contact>> = contactDao.getAllContacts()
+    val allActiveContacts: LiveData<List<Contact>> = contactDao.getAllActiveContacts()
+    val favoriteContacts: LiveData<List<Contact>> = contactDao.getFavoriteContacts()
+    val deletedContacts: LiveData<List<Contact>> = contactDao.getDeletedContacts()
+
+    fun searchActiveContacts(query: String): LiveData<List<Contact>> {
+        print(query)
+        return contactDao.searchActiveContacts(query)
+    }
 
     suspend fun insert(contact: Contact) {
         contactDao.insertContact(contact)
@@ -14,11 +21,23 @@ class ContactRepository(private val contactDao: ContactDao) {
         contactDao.updateContact(contact)
     }
 
-    suspend fun delete(contact: Contact) {
-        contactDao.deleteContact(contact)
+    suspend fun markAsDeleted(contact: Contact) {
+        contactDao.markAsDeleted(contact.id, System.currentTimeMillis())
     }
 
-    fun searchContacts(query: String): LiveData<List<Contact>> {
-        return contactDao.searchContacts(query)
+    suspend fun restoreContact(contact: Contact) {
+        contactDao.restoreContact(contact.id)
+    }
+
+    suspend fun deletePermanently(contact: Contact) {
+        contactDao.deleteContactPermanently(contact)
+    }
+
+    suspend fun toggleFavorite(contact: Contact) {
+        contactDao.setFavoriteStatus(contact.id, !contact.isFavorite)
+    }
+
+    suspend fun emptyTrash() {
+        contactDao.emptyTrash()
     }
 }

@@ -6,14 +6,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.vinn.contactapp.R
 import com.vinn.contactapp.data.Contact
+import com.vinn.contactapp.databinding.DialogContactDetailsBinding
 import com.vinn.contactapp.databinding.FragmentAddEditContactBinding
 import com.vinn.contactapp.utils.AvatarStore
 import com.vinn.contactapp.viewmodel.ContactViewModel
@@ -25,7 +26,7 @@ class AddEditContactFragment : Fragment() {
     private var _binding: FragmentAddEditContactBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: ContactViewModel by viewModels()
+    private val viewModel: ContactViewModel by activityViewModels()
     private val args: AddEditContactFragmentArgs by navArgs()
 
     private var currentContact: Contact? = null
@@ -50,16 +51,15 @@ class AddEditContactFragment : Fragment() {
         setupAvatarRecyclerView()
 
         if (currentContact != null) {
-            // Edit mode
             binding.toolbar.title = "Edit Contact"
-            binding.btnSave.text = "Update Contact"
+            binding.btnSave.text = getString(R.string.update_contact_button)
             populateFields()
         } else {
-            // Add mode
-            binding.toolbar.title = "Add Contact"
-            binding.btnSave.text = "Save Contact"
+            binding.toolbar.title = getString(R.string.add_contact_title)
+            binding.btnSave.text = getString(R.string.save_contact_button)
             updateDobText()
             updateAvatarPreview()
+            avatarAdapter.setSelected(AvatarStore.avatars.first())
         }
 
         binding.etDob.setOnClickListener {
@@ -71,7 +71,7 @@ class AddEditContactFragment : Fragment() {
         }
 
         binding.btnSave.setOnClickListener {
-            saveContact()
+            validateAndSaveContact()
         }
     }
 
@@ -85,31 +85,40 @@ class AddEditContactFragment : Fragment() {
         binding.rvAvatars.apply {
             adapter = avatarAdapter
             layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+            setHasFixedSize(true)
         }
     }
 
     private fun populateFields() {
-        currentContact?.let {
-            binding.etName.setText(it.name)
-            binding.etEmail.setText(it.email)
-            selectedDob = it.dob
-            selectedAvatarResName = it.avatarResName
+        currentContact?.let { contact ->
+            binding.etName.setText(contact.name)
+            binding.etEmail.setText(contact.email)
+            selectedDob = contact.dob
+            selectedAvatarResName = contact.avatarResName
 
             updateDobText()
             updateAvatarPreview()
 
-            val selectedAvatar = AvatarStore.avatars.find { a -> a.resName == it.avatarResName }
-            if (selectedAvatar != null) {
-                avatarAdapter.setSelected(selectedAvatar)
-                binding.rvAvatars.scrollToPosition(AvatarStore.avatars.indexOf(selectedAvatar))
+            val selectedAvatar = AvatarStore.avatars.find { it.resName == contact.avatarResName }
+            selectedAvatar?.let {
+                avatarAdapter.setSelected(it)
+                val position = AvatarStore.avatars.indexOf(it)
+                if (position != -1) {
+                    binding.rvAvatars.scrollToPosition(position)
+                }
             }
         }
     }
 
     private fun updateDobText() {
-        val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-        binding.etDob.setText(sdf.format(Date(selectedDob)))
+        binding.etDob.setText(formatDate(selectedDob))
     }
+
+    private fun formatDate(timestamp: Long): String {
+        val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+        return sdf.format(Date(timestamp))
+    }
+
 
     private fun updateAvatarPreview() {
         val resId = AvatarStore.getAvatarResourceId(requireContext(), selectedAvatarResName)
@@ -124,6 +133,10 @@ class AddEditContactFragment : Fragment() {
             calendar.set(Calendar.YEAR, year)
             calendar.set(Calendar.MONTH, month)
             calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
+            calendar.set(Calendar.HOUR_OF_DAY, 0)
+            calendar.set(Calendar.MINUTE, 0)
+            calendar.set(Calendar.SECOND, 0)
+            calendar.set(Calendar.MILLISECOND, 0)
             selectedDob = calendar.timeInMillis
             updateDobText()
         }
@@ -137,52 +150,80 @@ class AddEditContactFragment : Fragment() {
         ).show()
     }
 
-    private fun saveContact() {
+    private fun validateAndSaveContact() {
         val name = binding.etName.text.toString().trim()
         val email = binding.etEmail.text.toString().trim()
 
-        if (name.isEmpty() || email.isEmpty()) {
-            Toast.makeText(requireContext(), "Please fill in all fields", Toast.LENGTH_SHORT).show()
+        if (name.isEmpty()) {
+            binding.tilName.error = getString(R.string.error_name_required)
             return
+        } else {
+            binding.tilName.error = null
         }
 
-        val title = if (currentContact == null) "Save Contact" else "Update Contact"
-        val message = "Are you sure you want to $title?"
+        if (email.isEmpty()) {
+            binding.tilEmail.error = getString(R.string.error_email_required)
+            return
+        } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            binding.tilEmail.error = getString(R.string.error_email_invalid)
+            return
+        }
+        else {
+            binding.tilEmail.error = null
+        }
 
-        showSaveConfirmationDialog(title, message, name, email)
+        val contactToSave = (currentContact?.copy(
+            name = name,
+            email = email,
+            dob = selectedDob,
+            avatarResName = selectedAvatarResName
+        ) ?: Contact(
+            name = name,
+            email = email,
+            dob = selectedDob,
+            avatarResName = selectedAvatarResName
+        ))
+
+
+        val dialogTitleRes = if (currentContact == null) R.string.save_contact_title else R.string.update_contact_title
+        val dialogMessageRes = if (currentContact == null) R.string.save_confirmation_message else R.string.update_confirmation_message
+        val positiveButtonTextRes = if (currentContact == null) R.string.save_button else R.string.update_button
+
+
+        showSaveConfirmationDialog(
+            getString(dialogTitleRes),
+            getString(dialogMessageRes),
+            getString(positiveButtonTextRes),
+            contactToSave
+        )
     }
 
-    private fun showSaveConfirmationDialog(title: String, message: String, name: String, email: String) {
-        AlertDialog.Builder(requireContext())
+    private fun showSaveConfirmationDialog(title: String, message: String, positiveButtonText: String, contact: Contact) {
+        val dialogBinding = DialogContactDetailsBinding.inflate(layoutInflater)
+
+        dialogBinding.dialogTvName.text = contact.name
+        dialogBinding.dialogTvEmail.text = contact.email
+        dialogBinding.dialogTvMessage.text = message
+        val avatarResId = AvatarStore.getAvatarResourceId(requireContext(), contact.avatarResName)
+        dialogBinding.dialogImgAvatar.setImageResource(avatarResId)
+
+        MaterialAlertDialogBuilder(requireContext())
             .setTitle(title)
-            .setMessage(message)
-            .setIcon(R.drawable.ic_save)
-            .setPositiveButton(title) { _, _ ->
+            .setView(dialogBinding.root)
+            .setPositiveButton(positiveButtonText) { _, _ ->
                 if (currentContact == null) {
-                    // Create new
-                    val newContact = Contact(
-                        name = name,
-                        email = email,
-                        dob = selectedDob,
-                        avatarResName = selectedAvatarResName
-                    )
-                    viewModel.insert(newContact)
+                    viewModel.insert(contact)
+                    Toast.makeText(requireContext(), R.string.contact_saved_success, Toast.LENGTH_SHORT).show()
                 } else {
-                    // Update existing
-                    val updatedContact = currentContact!!.copy(
-                        name = name,
-                        email = email,
-                        dob = selectedDob,
-                        avatarResName = selectedAvatarResName
-                    )
-                    viewModel.update(updatedContact)
+                    viewModel.update(contact)
+                    Toast.makeText(requireContext(), R.string.contact_updated_success, Toast.LENGTH_SHORT).show()
                 }
                 findNavController().popBackStack()
             }
-            .setNegativeButton("Cancel", null)
-            .create()
+            .setNegativeButton(R.string.cancel_button, null)
             .show()
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()

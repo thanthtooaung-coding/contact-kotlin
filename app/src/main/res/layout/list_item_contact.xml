@@ -19,6 +19,7 @@
             android:id="@+id/img_avatar"
             android:layout_width="50dp"
             android:layout_height="50dp"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:src="@drawable/ic_avatar_1" />
@@ -28,23 +29,38 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
+            android:layout_marginEnd="8dp"
             android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
             android:textSize="18sp"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/img_favorite"
             app:layout_constraintStart_toEndOf="@id/img_avatar"
-            app:layout_constraintTop_toTopOf="@id/img_avatar"
-            tools:text="Sandy" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/tv_email"
+            app:layout_constraintVertical_chainStyle="packed"
+            tools:text="Sandy Barr" />
 
         <TextView
             android:id="@+id/tv_email"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
             android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toEndOf="@id/tv_name"
             app:layout_constraintStart_toStartOf="@id/tv_name"
             app:layout_constraintTop_toBottomOf="@id/tv_name"
-            tools:text="sandy@greenwich.com" />
+            app:layout_constraintBottom_toBottomOf="parent"
+            tools:text="sandy.barr@example.com" />
+
+        <ImageView
+            android:id="@+id/img_favorite"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:padding="4dp"
+            android:contentDescription="@string/favorite_icon_description"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:tint="?attr/colorSecondary"
+            tools:src="@drawable/ic_star_border" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

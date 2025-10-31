@@ -1,16 +1,20 @@
 package com.vinn.contactapp.adapter
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.vinn.contactapp.R
 import com.vinn.contactapp.data.Contact
 import com.vinn.contactapp.databinding.ListItemContactBinding
 import com.vinn.contactapp.utils.AvatarStore
 
-class ContactAdapter(private val onClick: (Contact) -> Unit) :
-    ListAdapter<Contact, ContactAdapter.ContactViewHolder>(ContactDiffCallback()) {
+class ContactAdapter(
+    private val onClick: (Contact) -> Unit,
+    private val onFavoriteClick: (Contact) -> Unit
+) : ListAdapter<Contact, ContactAdapter.ContactViewHolder>(ContactDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ContactViewHolder {
         val binding = ListItemContactBinding.inflate(
@@ -31,8 +35,16 @@ class ContactAdapter(private val onClick: (Contact) -> Unit) :
 
         init {
             binding.root.setOnClickListener {
-                if (adapterPosition != RecyclerView.NO_POSITION) {
-                    onClick(getItem(adapterPosition))
+                val position = adapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    onClick(getItem(position))
+                }
+            }
+
+            binding.imgFavorite.setOnClickListener {
+                val position = adapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    onFavoriteClick(getItem(position))
                 }
             }
         }
@@ -44,6 +56,18 @@ class ContactAdapter(private val onClick: (Contact) -> Unit) :
 
                 val avatarResId = AvatarStore.getAvatarResourceId(itemView.context, contact.avatarResName)
                 imgAvatar.setImageResource(avatarResId)
+
+                val favoriteIconRes = if (contact.isFavorite) {
+                    R.drawable.ic_star_filled
+                } else {
+                    R.drawable.ic_star_border
+                }
+                imgFavorite.setImageResource(favoriteIconRes)
+
+                imgFavorite.visibility = if (contact.isDeleted) View.GONE else View.VISIBLE
+
+                val alpha = if (contact.isDeleted) 0.6f else 1.0f
+                root.alpha = alpha
             }
         }
     }

@@ -1,3 +1,71 @@
 <resources>
     <string name="app_name">ContactApp</string>
+
+    <!-- Titles -->
+    <string name="add_contact_title">Add Contact</string>
+    <string name="edit_contact_title">Edit Contact</string>
+    <string name="save_contact_title">Save Contact</string>
+    <string name="update_contact_title">Update Contact</string>
+    <string name="delete_contact_title">Delete Contact</string>
+    <string name="restore_contact_title">Restore Contact</string>
+    <string name="permanent_delete_title">Delete Permanently</string>
+    <string name="empty_trash_title">Empty Trash</string>
+    <string name="title_all_contacts">All Contacts</string>
+    <string name="title_favorites">Favorites</string>
+    <string name="title_trash">Trash</string>
+
+
+    <!-- Button Labels -->
+    <string name="save_contact_button">Save Contact</string>
+    <string name="update_contact_button">Update Contact</string>
+    <string name="save_button">Save</string>
+    <string name="update_button">Update</string>
+    <string name="delete_button">Delete</string>
+    <string name="restore_button">Restore</string>
+    <string name="delete_permanently_button">Delete Permanently</string>
+    <string name="empty_trash_button">Empty Trash</string>
+    <string name="cancel_button">Cancel</string>
+    <string name="undo">Undo</string>
+
+    <!-- Confirmation Messages -->
+    <string name="save_confirmation_message">Are you sure you want to save this contact?</string>
+    <string name="update_confirmation_message">Are you sure you want to update this contact?</string>
+    <string name="delete_confirmation_message">Move contact \"%1$s\" to trash?</string> <!-- %1$s is placeholder for name -->
+    <string name="restore_confirmation_message">Restore contact \"%1$s\" from trash?</string>
+    <string name="permanent_delete_confirmation_message">Permanently delete contact \"%1$s\"?\nThis action cannot be undone.</string>
+    <string name="empty_trash_confirmation_message">Permanently delete all contacts in the trash?\nThis action cannot be undone.</string>
+
+    <!-- Feedback Messages -->
+    <string name="contact_saved_success">Contact saved</string>
+    <string name="contact_updated_success">Contact updated</string>
+    <string name="contact_moved_to_trash">Moved %1$s to trash</string>
+    <string name="contact_restored">%1$s restored</string>
+    <string name="contact_permanently_deleted">%1$s permanently deleted</string>
+    <string name="trash_emptied">Trash emptied</string>
+    <string name="edit_not_allowed_in_trash">Cannot edit contacts in the trash.</string>
+
+
+    <!-- Input Validation Errors -->
+    <string name="error_name_required">Name cannot be empty</string>
+    <string name="error_email_required">Email cannot be empty</string>
+    <string name="error_email_invalid">Invalid email format</string>
+
+    <!-- Content Descriptions -->
+    <string name="favorite_icon_description">Favorite status icon</string>
+    <string name="add_new_contact_fab">Add new contact</string>
+
+
+    <!-- Empty States -->
+    <string name="empty_state_all">No contacts yet.\nTap + to add one!</string>
+    <string name="empty_state_favorites">No favorite contacts found.</string>
+    <string name="empty_state_trash">Trash is empty.</string>
+
+
+    <!-- Menu Items -->
+    <string name="menu_search">Search</string>
+    <string name="menu_filter_group">Filter</string>
+    <string name="menu_show_all">All Contacts</string>
+    <string name="menu_show_favorites">Favorites</string>
+    <string name="menu_show_trash">Trash</string>
+    <string name="menu_empty_trash">Empty Trash</string>
 </resources>

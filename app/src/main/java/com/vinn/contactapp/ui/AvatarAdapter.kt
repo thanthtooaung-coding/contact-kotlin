@@ -18,8 +18,7 @@ class AvatarAdapter(
         fun bind(avatar: Avatar) {
             val resId = AvatarStore.getAvatarResourceId(itemView.context, avatar.resName)
             binding.imgAvatar.setImageResource(resId)
-            
-            // Show selection state
+
             binding.avatarCard.strokeWidth = if (selectedPosition == adapterPosition) 8 else 0
 
             binding.root.setOnClickListener {
@@ -31,9 +30,9 @@ class AvatarAdapter(
     fun setSelected(avatar: Avatar) {
         val newPosition = avatars.indexOf(avatar)
         if (newPosition != -1) {
-            notifyItemChanged(selectedPosition) // Unselect old
+            notifyItemChanged(selectedPosition)
             selectedPosition = newPosition
-            notifyItemChanged(selectedPosition) // Select new
+            notifyItemChanged(selectedPosition)
         }
     }
 
