@@ -96,18 +96,18 @@ class ContactListFragment : Fragment() {
         binding.toolbar.invalidateMenu()
     }
 
-
     private fun setupMenu() {
-        // val menuHost: MenuHost = requireActivity() // <-- OLD
-        val menuHost: MenuHost = binding.toolbar   // <-- NEW FIX
+        val menuHost: MenuHost = binding.toolbar
 
         menuHost.addMenuProvider(object : MenuProvider {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-                // This code was already correct, but it wasn't being
-                // attached to the right toolbar.
                 menuInflater.inflate(R.menu.list_menu, menu)
 
                 val searchItem = menu.findItem(R.id.action_search)
+                searchItem.isVisible = currentFilter == ContactFilter.ALL
+
+                menu.findItem(R.id.action_empty_trash).isVisible = currentFilter == ContactFilter.TRASH
+
                 val searchView = searchItem.actionView as SearchView
 
                 searchItem.isVisible = currentFilter == ContactFilter.ALL
@@ -138,7 +138,6 @@ class ContactListFragment : Fragment() {
                     }
                 })
 
-                // --- THIS LISTENER WILL NOW WORK ---
                 searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
                     override fun onQueryTextSubmit(query: String?): Boolean {
                         return false
@@ -150,8 +149,6 @@ class ContactListFragment : Fragment() {
 
                         Log.d("SearchDebug", "Fragment listener: newText is '$query'")
                         Log.d("SearchDebug", "Fragment listener: current VM query is '$currentVMQuery'")
-
-//                        viewModel.setSearchQuery(query)
 
                          if (currentVMQuery != query) {
                             Log.d("SearchDebug", "Fragment listener: Queries are DIFFERENT. Calling setSearchQuery.")
