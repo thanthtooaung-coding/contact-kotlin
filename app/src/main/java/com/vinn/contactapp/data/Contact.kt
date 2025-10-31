@@ -15,6 +15,7 @@ data class Contact(
     val dob: Long,
     val email: String,
     val avatarResName: String,
+    val label: String = "",
     var isFavorite: Boolean = false,
     var isDeleted: Boolean = false,
     var deletedTimestamp: Long? = null

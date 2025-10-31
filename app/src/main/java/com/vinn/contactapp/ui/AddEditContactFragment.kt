@@ -6,11 +6,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.view.children
+import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.vinn.contactapp.R
 import com.vinn.contactapp.data.Contact
@@ -33,6 +36,8 @@ class AddEditContactFragment : Fragment() {
     private var selectedDob: Long = System.currentTimeMillis()
     private var selectedAvatarResName: String = AvatarStore.avatars.first().resName
 
+    private val suggestedLabels = listOf("Family", "Work", "Friend", "Emergency", "Vendor")
+
     private lateinit var avatarAdapter: AvatarAdapter
 
     override fun onCreateView(
@@ -49,9 +54,11 @@ class AddEditContactFragment : Fragment() {
         currentContact = args.currentContact
 
         setupAvatarRecyclerView()
+        setupLabelChipGroup()
+        setupLabelFieldValidation()
 
         if (currentContact != null) {
-            binding.toolbar.title = "Edit Contact"
+            binding.toolbar.title = getString(R.string.edit_contact_title)
             binding.btnSave.text = getString(R.string.update_contact_button)
             populateFields()
         } else {
@@ -75,6 +82,46 @@ class AddEditContactFragment : Fragment() {
         }
     }
 
+    private fun setupLabelChipGroup() {
+        binding.chipGroupLabels.removeAllViews()
+        suggestedLabels.forEach { label ->
+            val chip = Chip(requireContext()).apply {
+                text = label
+                isClickable = true
+                isCheckable = true
+                chipBackgroundColor = resources.getColorStateList(R.color.chip_background_selector, null)
+                setTextColor(resources.getColorStateList(R.color.chip_text_selector, null))
+            }
+
+            chip.setOnCheckedChangeListener { chipView, isChecked ->
+                if (isChecked) {
+                    binding.etLabel.setText(chipView.text)
+                } else if (binding.etLabel.text.toString() == chipView.text.toString()) {
+                    binding.etLabel.setText("")
+                }
+            }
+            binding.chipGroupLabels.addView(chip)
+        }
+    }
+
+    private fun setupLabelFieldValidation() {
+        binding.etLabel.doAfterTextChanged { text ->
+            val label = text.toString().trim()
+            if (label.length > 15) {
+                binding.tilLabel.error = getString(R.string.error_label_max_length)
+            } else {
+                binding.tilLabel.error = null
+            }
+
+            binding.chipGroupLabels.children.mapNotNull { it as? Chip }.forEach { chip ->
+                if (chip.text.toString() != label && chip.isChecked) {
+                    chip.isChecked = false
+                }
+            }
+        }
+    }
+
+
     private fun setupAvatarRecyclerView() {
         avatarAdapter = AvatarAdapter(AvatarStore.avatars) { avatar ->
             selectedAvatarResName = avatar.resName
@@ -93,11 +140,15 @@ class AddEditContactFragment : Fragment() {
         currentContact?.let { contact ->
             binding.etName.setText(contact.name)
             binding.etEmail.setText(contact.email)
+            binding.etLabel.setText(contact.label)
             selectedDob = contact.dob
             selectedAvatarResName = contact.avatarResName
 
             updateDobText()
             updateAvatarPreview()
+
+            val selectedChip = binding.chipGroupLabels.children.mapNotNull { it as? Chip }.find { it.text == contact.label }
+            selectedChip?.isChecked = true
 
             val selectedAvatar = AvatarStore.avatars.find { it.resName == contact.avatarResName }
             selectedAvatar?.let {
@@ -153,6 +204,7 @@ class AddEditContactFragment : Fragment() {
     private fun validateAndSaveContact() {
         val name = binding.etName.text.toString().trim()
         val email = binding.etEmail.text.toString().trim()
+        val label = binding.etLabel.text.toString().trim()
 
         if (name.isEmpty()) {
             binding.tilName.error = getString(R.string.error_name_required)
@@ -172,16 +224,27 @@ class AddEditContactFragment : Fragment() {
             binding.tilEmail.error = null
         }
 
+        if (label.length > 15) {
+            binding.tilLabel.error = getString(R.string.error_label_max_length)
+            return
+        }
+        else {
+            binding.tilLabel.error = null
+        }
+
+
         val contactToSave = (currentContact?.copy(
             name = name,
             email = email,
             dob = selectedDob,
-            avatarResName = selectedAvatarResName
+            avatarResName = selectedAvatarResName,
+            label = label
         ) ?: Contact(
             name = name,
             email = email,
             dob = selectedDob,
-            avatarResName = selectedAvatarResName
+            avatarResName = selectedAvatarResName,
+            label = label
         ))
 
 

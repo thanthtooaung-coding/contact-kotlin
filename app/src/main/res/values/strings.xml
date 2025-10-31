@@ -45,10 +45,10 @@
     <string name="edit_not_allowed_in_trash">Cannot edit contacts in the trash.</string>
 
 
-    <!-- Input Validation Errors -->
     <string name="error_name_required">Name cannot be empty</string>
     <string name="error_email_required">Email cannot be empty</string>
     <string name="error_email_invalid">Invalid email format</string>
+    <string name="error_label_max_length">Label should be 15 characters or less</string>
 
     <!-- Content Descriptions -->
     <string name="favorite_icon_description">Favorite status icon</string>
@@ -68,4 +68,7 @@
     <string name="menu_show_favorites">Favorites</string>
     <string name="menu_show_trash">Trash</string>
     <string name="menu_empty_trash">Empty Trash</string>
+
+    <string name="hint_label">Label / Tag (e.g., Work, Family)</string>
+    <string name="label_select_label">Quick Select Label</string>
 </resources>

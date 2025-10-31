@@ -10,6 +10,7 @@ import com.vinn.contactapp.R
 import com.vinn.contactapp.data.Contact
 import com.vinn.contactapp.databinding.ListItemContactBinding
 import com.vinn.contactapp.utils.AvatarStore
+import java.util.Locale
 
 class ContactAdapter(
     private val onClick: (Contact) -> Unit,
@@ -56,6 +57,22 @@ class ContactAdapter(
 
                 val avatarResId = AvatarStore.getAvatarResourceId(itemView.context, contact.avatarResName)
                 imgAvatar.setImageResource(avatarResId)
+
+                if (contact.label.isNotBlank() && !contact.isDeleted) {
+                    tvLabel.text = contact.label
+                    tvLabel.visibility = View.VISIBLE
+
+                    val colorResId = when (contact.label.lowercase(Locale.getDefault())) {
+                        "family" -> R.color.label_family
+                        "work" -> R.color.label_work
+                        "friend" -> R.color.label_friend
+                        "emergency" -> R.color.label_emergency
+                        else -> R.color.label_default
+                    }
+                    tvLabel.background.setTint(itemView.context.getColor(colorResId))
+                } else {
+                    tvLabel.visibility = View.GONE
+                }
 
                 val favoriteIconRes = if (contact.isFavorite) {
                     R.drawable.ic_star_filled
